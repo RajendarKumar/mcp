@@ -27,6 +27,21 @@ class NotesStore:
         self._next_id += 1
         return note
 
+    def get_note(self, note_id: str) -> Note | None:
+        """Get a note by its ID, or None if not found."""
+        for note in self._notes:
+            if note.id == note_id:
+                return note.model_copy()
+        return None
+
     def list_all(self) -> list[Note]:
         """Return a snapshot of all stored notes."""
         return self._notes.copy()
+
+    def delete(self, note_id: str) -> bool:
+        """Delete a note by its ID, returning True if deleted."""
+        for index, note in enumerate(self._notes):
+            if note.id == note_id:
+                del self._notes[index]
+                return True
+        return False

@@ -27,6 +27,16 @@ def create_server() -> MCPServer:
         """List all notes currently stored by this server."""
         return store.list_all()
 
+    @server.tool()
+    def get_note(note_id: str) -> Note | None:
+        """Get a note by its ID, or None if not found."""
+        return store.get_note(note_id)
+
+    @server.tool()
+    def delete_note(note_id: str) -> bool:
+        """Delete a note by its ID, returning True if deleted, False if not found."""
+        return store.delete(note_id)
+
     @server.resource("notes://all")
     def all_notes() -> str:
         """Read all notes as JSON application context."""

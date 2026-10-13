@@ -41,6 +41,38 @@ async def test_create_and_list_notes() -> None:
 
 
 @pytest.mark.anyio
+async def test_get_and_delete_notes() -> None:
+    server = create_server()
+
+    async with Client(server, raise_exceptions=True) as client:
+        await client.call_tool(
+            "create_note",
+            {"title": "MCP", "content": "Notes can be looked up and deleted."},
+        )
+        found = await client.call_tool("get_note", {"note_id": "1"})
+        not_found = await client.call_tool("get_note", {"note_id": "missing"})
+        deleted = await client.call_tool("delete_note", {"note_id": "1"})
+        not_deleted = await client.call_tool("delete_note", {"note_id": "1"})
+        remaining = await client.call_tool("list_notes", {})
+
+    assert found.is_error is False
+    assert found.structured_content == {
+        "result": {
+            "id": "1",
+            "title": "MCP",
+            "content": "Notes can be looked up and deleted.",
+        },
+    }
+    assert not_found.is_error is False
+    assert not_found.structured_content == {"result": None}
+    assert deleted.is_error is False
+    assert deleted.structured_content == {"result": True}
+    assert not_deleted.is_error is False
+    assert not_deleted.structured_content == {"result": False}
+    assert remaining.structured_content == {"result": []}
+
+
+@pytest.mark.anyio
 async def test_notes_resource_and_summary_prompt() -> None:
     server = create_server()
 
